@@ -37,17 +37,17 @@ config_webrx: configuration options for OpenWebRX
 # ==== Server settings ====
 web_port=8073
 server_hostname="localhost" # If this contains an incorrect value, the web UI may freeze on load (it can't open websocket)
-max_clients=20
+max_clients=5
 
 # ==== Web GUI configuration ====
-receiver_name="[Callsign]"
-receiver_location="Budapest, Hungary"
-receiver_qra="JN97ML"
+receiver_name="[KI7ZTM]"
+receiver_location="Briar, Washington, USA"
+receiver_qra="CN87ut"
 receiver_asl=200
-receiver_ant="Longwire"
-receiver_device="RTL-SDR"
-receiver_admin="example@example.com"
-receiver_gps=(47.000000,19.000000)
+receiver_ant="40m wire dipole"
+receiver_device="Airspy Mini"
+receiver_admin="KI7ZTM@winlink.org"
+receiver_gps=(47.814077,-122.271856)
 photo_height=350
 photo_title="Panorama of Budapest from Schönherz Zoltán Dormitory"
 photo_desc="""
@@ -57,6 +57,7 @@ Device: %[RX_DEVICE]<br />
 Antenna: %[RX_ANT]<br />
 Website: <a href="http://localhost" target="_blank">http://localhost</a>
 """
+
 
 # ==== sdr.hu listing ====
 # If you want your ham receiver to be listed publicly on sdr.hu, then take the following steps:
@@ -72,10 +73,24 @@ fft_size=4096 #Should be power of 2
 fft_voverlap_factor=0.3 #If fft_voverlap_factor is above 0, multiple FFTs will be used for creating a line on the diagram.
 
 # samp_rate = 250000
-samp_rate = 2400000
-center_freq = 144250000
-rf_gain = 5 #in dB. For an RTL-SDR, rf_gain=0 will set the tuner to auto gain mode, else it will be in manual gain mode.
+# samp_rate = 2400000
+# center_freq = 144250000
+# rf_gain = 5 #in dB. For an RTL-SDR, rf_gain=0 will set the tuner to auto gain mode, else it will be in manual gain mode.
+
 ppm = 0
+samp_rate = 3000000 #can be 2500000 or 10000000 for AirSpy R1/R2, and 3000000 for AirSpy Mini
+#center_freq = 144900000
+center_freq = 134500000
+rf_gain = 16
+sensitivity_gain = 16
+bias_tee = 0
+shown_center_freq = center_freq - 120000000
+#start_rtl_command = "airspy_rx -f{center_freq} -r /dev/stdout -a{samp_rate} -g{rf_gain} -b{bias_tee}".format(bias_tee=bias_tee, rf_gain=rf_gain, center_freq=str(center_freq/1e6), samp_rate=samp_rate)
+start_rtl_command = "airspy_rx -f{center_freq} -r /dev/stdout -a{samp_rate} -h{rf_gain} -b{bias_tee}".format(bias_tee=bias_tee, rf_gain=rf_gain, center_freq=str(center_freq/1e6), samp_rate=samp_rate)
+# shown_center_freq = center_freq # No upcoverter
+# offset_freq = -120000000 # cole - not sure about this
+# start_rtl_command = "airspy_rx -f{center_freq} -r /dev/stdout -g{rf_gain} -b{bias_tee}".format(bias_tee=bias_tee, rf_gain=rf_gain, center_freq=str((center_freq/1e6)-(offset_freq/1e6)), samp_rate=samp_rate)
+format_conversion = "csdr convert_s16_f"
 
 audio_compression="adpcm" #valid values: "adpcm", "none"
 fft_compression="adpcm" #valid values: "adpcm", "none"
@@ -104,8 +119,8 @@ Note: if you experience audio underruns while CPU usage is 100%, you can:
 # You can use other SDR hardware as well, by giving your own command that outputs the I/Q samples... Some examples of configuration are available here (default is RTL-SDR):
 
 # >> RTL-SDR via rtl_sdr
-start_rtl_command="rtl_sdr -s {samp_rate} -f {center_freq} -p {ppm} -g {rf_gain} -".format(rf_gain=rf_gain, center_freq=center_freq, samp_rate=samp_rate, ppm=ppm)
-format_conversion="csdr convert_u8_f"
+# start_rtl_command="rtl_sdr -s {samp_rate} -f {center_freq} -p {ppm} -g {rf_gain} -".format(rf_gain=rf_gain, center_freq=center_freq, samp_rate=samp_rate, ppm=ppm)
+# format_conversion="csdr convert_u8_f"
 
 #lna_gain=8
 #rf_amp=1
@@ -156,8 +171,6 @@ To use a HackRF, compile the HackRF host tools from its "stdout" branch:
 
 # ==== Misc settings ====
 
-shown_center_freq = center_freq #you can change this if you use an upconverter
-
 client_audio_buffer_size = 5
 #increasing client_audio_buffer_size will:
 # - also increase the latency
@@ -176,7 +189,7 @@ iq_server_port = 4951 #TCP port for ncat to listen on. It will send I/Q data ove
 
 ### default theme by teejez:
 waterfall_colors = "[0x000000ff,0x0000ffff,0x00ffffff,0x00ff00ff,0xffff00ff,0xff0000ff,0xff00ffff,0xffffffff]"
-waterfall_min_level = -88 #in dB
+waterfall_min_level = -100 #in dB
 waterfall_max_level = -20
 waterfall_auto_level_margin = (5, 40)
 ### old theme by HA7ILM:
